@@ -1,0 +1,71 @@
+---
+stages:
+  - setup
+  - compile
+  - test
+
+# First define all routines 
+.setup_ubuntu: &setup_ubuntu
+  stage: setup
+  script: 
+    - >
+      sudo apt-get install --yes --force-yes -qq --no-install-recommends
+      build-essential
+      gfortran 
+      git
+      cmake
+      libmgl-dev
+      libeigen3-dev
+      libboost-all-dev
+      libsuitesparse-dev
+      libmatio-dev
+      libblas-dev
+      liblapack-dev
+
+.compile: &compile
+  stage: compile
+  script:
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make -j8
+  cache:
+    paths:
+      - build/
+
+.test: &test
+  stage: test
+  script:
+    - cd build
+    - ../scripts/run-tests.sh
+  cache:
+    paths:
+      - build/
+#
+# Setup stage
+#
+setup_ubuntu-bionic-1:
+  <<: *setup_ubuntu
+  tags: [ubuntu-bionic-1]
+
+#
+# Compile stage
+#
+compile_ubuntu-bionic-1:
+  <<: *compile
+  cache:
+    key: cache_ubuntu-bionic-1_${CI_COMMIT_REF_SLUG}
+    paths:
+      - build/
+  tags: [ubuntu-bionic-1]
+
+#
+# Testing stage
+#
+test_ubuntu-bionic-1:
+  <<: *test
+  cache:
+    key: cache_ubuntu-bionic-1_${CI_COMMIT_REF_SLUG}
+    paths:
+      - build/
+  tags: [ubuntu-bionic-1]
