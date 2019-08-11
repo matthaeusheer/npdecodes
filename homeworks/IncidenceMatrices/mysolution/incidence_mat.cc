@@ -45,10 +45,25 @@ std::shared_ptr<Mesh> createDemoMesh() {
 // @return The edge-vertex incidence matrix as Eigen::SparseMatrix<int>
 SparseMatrix<int> computeEdgeVertexIncidenceMatrix(const Mesh& mesh) {
   // Store edge-vertex incidence matrix here
+  assert(mesh.DimMesh() == 2 && "Mesh not 2D!");
   SparseMatrix<int, RowMajor> G;
 
   /* BEGIN_SOLUTION */
-  /* TODO Your implementation goes here */
+  // In every row (corresponding to an edge (co-dim 1 entity)) reserve space for two (incident nodes) non-zero entries
+  const size_t n_edges = mesh.NumEntities(1);
+  const size_t n_nodes = mesh.NumEntities(2);
+
+  G = SparseMatrix<int, RowMajor>(n_edges, n_nodes);
+  G.reserve(Eigen::VectorXi::Constant(n_edges, 2));
+  // Loop over all edges and check their endpoint nodes.
+  for (const auto& edge : mesh.Entities(1)) {
+    auto edge_idx = mesh.Index(edge);
+    auto nodes = edge.SubEntities(1);
+    auto start_node_idx = mesh.Index(nodes[0]);
+    auto end_node_idx = mesh.Index(nodes[1]);
+    G.coeffRef(edge_idx, start_node_idx) += 1;
+    G.coeffRef(edge_idx, end_node_idx) += -1;
+  }
   /* END_SOLUTION */
 
   return G;
@@ -63,7 +78,29 @@ SparseMatrix<int> computeCellEdgeIncidenceMatrix(const Mesh& mesh) {
   SparseMatrix<int, RowMajor> D;
 
   /* BEGIN_SOLUTION */
-  /* TODO Your implementation goes here */
+  size_t n_cells = mesh.NumEntities(0);
+  size_t n_edges = mesh.NumEntities(1);
+
+  // Initialize sparse matrix and reserve space for max 4 non-zero entries per row (3 for triangle or 4 for squad)
+  D = SparseMatrix<int, RowMajor>(n_cells, n_edges);
+  D.reserve(Eigen::VectorXi::Constant(n_cells, 4));  // overestimating reserve size is ok
+
+  // Loop over all entities of co-dim 0, which are cells (triangles and squads)
+  for (const auto& cell : mesh.Entities(0)) {
+    auto cell_idx = mesh.Index(cell);
+
+    // Relative orientation of cell with corresponding edges gives 1 for same orientation, -1 for opposite orientation
+    auto rel_orientations = cell.RelativeOrientations();
+
+    // Loop over adjacent edges and add orientation sign to cell-edge incidence matrix.
+    auto edges = cell.SubEntities(1);
+    int iter_idx = 0;
+    for (const auto& edge : edges) {
+      size_t edge_idx = mesh.Index(edge);
+      D.coeffRef(cell_idx, edge_idx) += to_sign(rel_orientations[iter_idx]);
+      iter_idx++;
+    }
+  }
   /* END_SOLUTION */
 
   return D;
@@ -78,7 +115,11 @@ bool testZeroIncidenceMatrixProduct(const Mesh& mesh) {
   bool isZero = false;
 
   /* BEGIN_SOLUTION */
-  /* TODO Your implementation goes here */
+  SparseMatrix<int> G = computeEdgeVertexIncidenceMatrix(mesh);
+  SparseMatrix<int> D = computeCellEdgeIncidenceMatrix(mesh);
+  auto result_matrix = D * G;
+  int norm = result_matrix.norm();
+  isZero = norm == 0;
   /* END_SOLUTION */
 
   return isZero;
