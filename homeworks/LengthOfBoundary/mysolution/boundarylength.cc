@@ -6,6 +6,7 @@
  * @ copyright Developed at ETH Zurich
  */
 
+#include <boost/filesystem/path.hpp>
 #include "boundarylength.h"
 
 namespace LengthOfBoundary {
@@ -14,7 +15,11 @@ namespace LengthOfBoundary {
 double volumeOfDomain(const std::shared_ptr<lf::mesh::Mesh> mesh) {
   double volume = 0.0;
   /* BEGIN_SOLUTION */
-  // TODO Your implementation goes here!
+  // We loop over all entities of co-dim 0, i.e. cells and sum up their volumes (areas in 2D) via their geometry
+  for (const auto& cell : mesh->Entities(0)) {
+    auto cell_geo = cell.Geometry();
+    volume += lf::geometry::Volume(*cell_geo);
+  }
   /* END_SOLUTION */
   return volume;
 }
@@ -24,7 +29,13 @@ double volumeOfDomain(const std::shared_ptr<lf::mesh::Mesh> mesh) {
 double lengthOfBoundary(const std::shared_ptr<lf::mesh::Mesh> mesh) {
   double length = 0.0;
   /* BEGIN_SOLUTION */
-  // TODO Your implementation goes here!
+  // Loop over all edges (co-dim 1 in 2D) and add their length if they are flagged to be on the boundary
+  auto flagged_boundary = lf::mesh::utils::flagEntitiesOnBoundary(mesh, 1);
+  for (const auto& entity : mesh->Entities(1)) {
+    if (flagged_boundary(entity)) {
+      length += lf::geometry::Volume(*entity.Geometry());
+    }
+  }
   /* END_SOLUTION */
   return length;
 }
@@ -34,7 +45,14 @@ double lengthOfBoundary(const std::shared_ptr<lf::mesh::Mesh> mesh) {
 std::pair<double, double> measureDomain(std::string msh_file_name) {
   double volume, length;
   /* BEGIN_SOLUTION */
-  // TODO Your implementation goes here!
+  boost::filesystem::path here = __FILE__;
+  auto smiley_path = here.parent_path() / msh_file_name;
+  auto mesh_factory = std::make_unique<lf::mesh::hybrid2d::MeshFactory>(2);
+  lf::io::GmshReader reader(std::move(mesh_factory), smiley_path.string());
+  auto mesh = reader.mesh();
+
+  volume = volumeOfDomain(mesh);
+  length = lengthOfBoundary(mesh);
   /* END_SOLUTION */
 
   return {volume, length};

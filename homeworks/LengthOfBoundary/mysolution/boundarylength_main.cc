@@ -9,7 +9,9 @@
 #include "boundarylength.h"
 
 int main(int argc, char *argv[]) {
-  // BEGIN_SOLUTION
-  // TODO Your implementation goes here!
-  // END_SOLUTION
+
+  std::cout << "Loading mesh \"square.msh\"..." << std::endl;
+  auto domain_measurement = LengthOfBoundary::measureDomain("square.msh");
+  std::cout << "Volume: " << domain_measurement.first << std::endl;
+  std::cout << "Boundary length: " << domain_measurement.second << std::endl;
 }
