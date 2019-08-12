@@ -32,10 +32,8 @@ MyLinearFEElementMatrix::ElemMat MyLinearFEElementMatrix::Eval(
   // Computations differ depending on the type of the cell
   switch (ref_el) {
     case lf::base::RefEl::kTria(): {
-      double area = 0.5 * ((vertices(0, 1) - vertices(0, 0)) *
-                               (vertices(1, 2) - vertices(1, 0)) -
-                           (vertices(1, 1) - vertices(1, 0)) *
-                               (vertices(0, 2) - vertices(0, 0)));
+      double area = 0.5 * ((vertices(0, 1) - vertices(0, 0)) * (vertices(1, 2) - vertices(1, 0)) -
+                           (vertices(1, 1) - vertices(1, 0)) * (vertices(0, 2) - vertices(0, 0)));
       // clang-format off
       mass_elem_mat << 2.0, 1.0, 1.0, 0.0, 
 	1.0, 2.0, 1.0, 0.0, 

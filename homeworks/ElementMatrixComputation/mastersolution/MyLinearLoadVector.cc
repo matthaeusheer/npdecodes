@@ -48,9 +48,9 @@ MyLinearLoadVector::ElemVec computeLoadVector(
                         (vertices(0, 2) - vertices(0, 0)));
       // clang-format off
       midpoints << vertices(0, 0) + vertices(0, 1), vertices(0, 1) + vertices(0, 2), vertices(0, 2) + vertices(0, 0),
-	vertices(1, 0) + vertices(1, 1), vertices(1, 1) + vertices(1, 2), vertices(1, 2) + vertices(1, 0);
+	                 vertices(1, 0) + vertices(1, 1), vertices(1, 1) + vertices(1, 2), vertices(1, 2) + vertices(1, 0);
       // clang-format on
-      break;
+        break;
     }
     case 4: {
       // Compute cell area for rectangles
@@ -58,7 +58,7 @@ MyLinearLoadVector::ElemVec computeLoadVector(
           (vertices(0, 1) - vertices(0, 0)) * (vertices(1, 3) - vertices(1, 0));
       // clang-format off
       midpoints << vertices(0, 0) + vertices(0, 1), vertices(0, 1) + vertices(0, 2), vertices(0, 2) + vertices(0, 3), vertices(0, 3) + vertices(0, 0),
-	vertices(1, 0) + vertices(1, 1), vertices(1, 1) + vertices(1, 2), vertices(1, 2) + vertices(1, 3), vertices(1, 3) + vertices(1, 0);
+	                 vertices(1, 0) + vertices(1, 1), vertices(1, 1) + vertices(1, 2), vertices(1, 2) + vertices(1, 3), vertices(1, 3) + vertices(1, 0);
       // clang-format on
       break;
     }

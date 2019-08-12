@@ -68,7 +68,19 @@ Eigen::VectorXd solve(ELMAT_BUILDER& elmat_builder,
   Eigen::VectorXd sol_vec = Eigen::VectorXd::Zero(N_dofs);
 
   /* BEGIN_SOLUTION */
-  // Your implementation goes here!
+  Eigen::SparseLU<Eigen::SparseMatrix<double>> solver;
+  solver.analyzePattern(A_crs);
+  solver.factorize(A_crs);
+  if(solver.info()!=Eigen::Success) {
+    // decomposition failed
+    throw std::runtime_error("Could not decompose the matrix!");
+  }
+  // Could have been done in one step using solver.compute(A_crs);
+  sol_vec = solver.solve(phi);
+  if(solver.info()!=Eigen::Success) {
+    // solving failed
+    throw std::runtime_error("Solving for phi failed!");
+  }
   /* END_SOLUTION */
 
   double solver_error = (A_crs * sol_vec - phi).norm();
@@ -118,7 +130,11 @@ Eigen::VectorXd solvePoissonBVP() {
 
   /* SAM_LISTING_BEGIN_2 */
   /* BEGIN_SOLUTION */
-  // Your implementation goes here!
+
+  auto elmat_builder = lf::uscalfe::LinearFELaplaceElementMatrix();
+  auto elvec_builder = lf::uscalfe::LinearFELocalLoadVector<double, decltype(mf_f)>(mf_f);
+  solution = solve(elmat_builder, elvec_builder);
+
   /* END_SOLUTION */
   /* SAM_LISTING_END_2 */
 

@@ -94,6 +94,7 @@ SparseMatrix<int> computeCellEdgeIncidenceMatrix(const Mesh& mesh) {
 
     // Loop over adjacent edges and add orientation sign to cell-edge incidence matrix.
     auto edges = cell.SubEntities(1);
+
     int iter_idx = 0;
     for (const auto& edge : edges) {
       size_t edge_idx = mesh.Index(edge);
