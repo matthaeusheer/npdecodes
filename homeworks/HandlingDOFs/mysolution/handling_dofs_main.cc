@@ -35,9 +35,9 @@ int main() {
 
   // Subproblem c)
   std::cout << "\n -- Subproblem (c)\n";
-  std::array<std::size_t, 3> entityDofs =
-      HandlingDOFs::countEntityDofs(lin_dofh);
+  std::array<std::size_t, 3> entityDofs = HandlingDOFs::countEntityDofs(lin_dofh);
   std::array<std::string, 3> entityNames = {"Cells", "Edges", "Nodes"};
+
   for (std::size_t codim = 0; codim <= 2; ++codim) {
     std::cout << entityNames[codim] << ": " << entityDofs[codim] << " dofs\n";
   }

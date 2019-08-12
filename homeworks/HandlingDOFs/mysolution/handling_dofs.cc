@@ -14,7 +14,14 @@ std::array<std::size_t, 3> countEntityDofs(
     const lf::assemble::DofHandler& dofhandler) {
   std::array<std::size_t, 3> entityDofs;
   /* BEGIN_SOLUTION */
-  /* TODO Your implementation goes here! */
+
+  for (int codim = 0; codim <= 2; codim++) {
+    entityDofs[codim] = 0;
+    for (const auto& entity : dofhandler.Mesh()->Entities(codim)) {
+      entityDofs[codim] += dofhandler.NoInteriorDofs(entity);
+    }
+  }
+
   /* END_SOLUTION */
   return entityDofs;
 }
@@ -26,7 +33,17 @@ std::size_t countBoundaryDofs(const lf::assemble::DofHandler& dofhandler) {
       lf::mesh::utils::flagEntitiesOnBoundary(mesh));
   std::size_t no_dofs_on_bd = 0;
   /* BEGIN_SOLUTION */
-  /* TODO Your implementation goes here! */
+
+  // Can have edges (codim 1) & nodes (codim 2) on the boundary. Count number of shape functions associated with those
+  // entities.
+  for (int codim = 1; codim <= 2; ++codim) {
+    for (const auto& entity : mesh->Entities(codim)) {
+      if (bd_flags(entity)) {
+        no_dofs_on_bd += dofhandler.NoInteriorDofs(entity);
+      }
+    }
+  }
+
   /* END_SOLUTION */
   return no_dofs_on_bd;
 }
@@ -35,7 +52,21 @@ double integrateLinearFEFunction(const lf::assemble::DofHandler& dofhandler,
                                  const Eigen::VectorXd& mu) {
   double I = 0;
   /* BEGIN_SOLUTION */
-  /* TODO Your implementation goes here! */
+
+  // First loop over cells (codim 0) and add contributions to integral
+  for (const auto& cell : dofhandler.Mesh()->Entities(0)) {
+    auto global_indices = dofhandler.GlobalDofIndices(cell);
+    LF_ASSERT_MSG(dofhandler.NoLocalDofs(cell) == 3, "Wrong number of local dofs.");
+    LF_ASSERT_MSG(dofhandler.NoInteriorDofs(cell) == 0, "Wrong number of local dofs.");
+    double area = lf::geometry::Volume(*cell.Geometry());
+    double local_integral = 0.0;
+    for (int loc_idx = 0; loc_idx < dofhandler.NoLocalDofs(cell); ++loc_idx) {
+      auto global_idx = global_indices[loc_idx];
+      local_integral += mu[global_idx];
+    }
+    I += area / 3 * local_integral;
+  }
+
   /* END_SOLUTION */
   return I;
 }
@@ -44,7 +75,22 @@ double integrateQuadraticFEFunction(const lf::assemble::DofHandler& dofhandler,
                                     const Eigen::VectorXd& mu) {
   double I = 0;
   /* BEGIN_SOLUTION */
-  /* TODO Your implementation goes here! */
+
+  // First loop over cells (codim 0) and add contributions to integral
+  for (const auto& cell : dofhandler.Mesh()->Entities(0)) {
+    auto global_indices = dofhandler.GlobalDofIndices(cell);
+    LF_ASSERT_MSG(dofhandler.NoLocalDofs(cell) == 6, "Wrong number of local dofs.");
+    LF_ASSERT_MSG(dofhandler.NoInteriorDofs(cell) == 0, "Wrong number of local dofs.");
+    double area = lf::geometry::Volume(*cell.Geometry());
+    double local_integral = 0.0;
+
+    for (int loc_idx = 3; loc_idx < 6; ++loc_idx) {
+      auto global_idx = global_indices[loc_idx];
+      local_integral += mu[global_idx];
+    }
+    I += area / 3 * local_integral;
+  }
+
   /* END_SOLUTION */
   return I;
 }

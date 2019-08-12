@@ -75,8 +75,8 @@ MyLinearLoadVector::ElemVec computeLoadVector(
 
   // Assembly of element vector
   for (int i = 0; i < num_nodes; i++) {
-    elem_vec(i) += 0.5 * f_midpoint_vals(i);
-    elem_vec(i) += 0.5 * f_midpoint_vals((i + 2) % num_nodes);
+    elem_vec[i] += 0.5 * f_midpoint_vals(i);
+    elem_vec[i] += 0.5 * f_midpoint_vals((i + 2) % num_nodes);
   }
 
   // Multiply with factor acc. to Equ. 2.8.10
